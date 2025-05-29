@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Feedback Analysis Result</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+
+<body class="bg-gradient-to-br from-slate-100 to-white min-h-screen flex items-center justify-center p-6">
+
+    <div class="bg-white shadow-2xl rounded-3xl p-8 max-w-5xl w-full space-y-8" data-aos="zoom-in">
+        <div class="flex justify-between items-center">
+            <h2 class="text-3xl font-bold text-indigo-700">📊 Feedback Summary</h2>
+            <a href="/form" class="text-sm text-indigo-600 hover:underline hover:text-indigo-800 transition">
+                ← Enter New Feedback
+            </a>
+        </div>
+
+        <div class="grid md:grid-cols-4 gap-6 text-gray-700 text-base">
+            <div id="summary-block" class="space-y-3 col-span-3">
+                <p><span class="font-semibold">Sentiment:</span> <span id="sentiment" class="break-words"></span></p>
+
+                <!-- Organization với nội dung dài -->
+                <p>
+                    <span class="font-semibold">Organization:</span>
+                    <span id="organization"
+                        class="block mt-1 p-2 bg-gray-50 rounded-lg border border-gray-200 text-sm leading-relaxed break-words max-h-40 overflow-y-auto"></span>
+                </p>
+
+                <p>
+                    <span class="font-semibold text-gray-900">Summary:</span>
+                    <span id="summary" class="block mt-1 p-3 bg-gray-50 rounded-lg border border-gray-300 border-opacity-30 
+               text-gray-900 text-base leading-relaxed font-normal break-words max-h-56 overflow-y-auto
+               text-justify shadow-sm" style="line-height: 1.65;">
+                    </span>
+                </p>
+
+
+
+                <p><span class="font-semibold">Length:</span> <span id="length"></span> characters</p>
+                <p><span class="font-semibold">Word Count:</span> <span id="word-count"></span></p>
+                <p><span class="font-semibold">Sentence Count:</span> <span id="sentence-count"></span></p>
+            </div>
+
+            <div class="bg-indigo-50 rounded-xl p-4 border border-indigo-200 max-h-[150px] col-span-1"
+                data-aos="fade-left">
+                <h3 class="text-lg font-medium mb-2 text-indigo-800">Quick Stats</h3>
+                <ul class="space-y-1 text-sm">
+                    <li>🔤 Total Characters: <strong id="stat-length"></strong></li>
+                    <li>📝 Total Words: <strong id="stat-words"></strong></li>
+                    <li>📎 Total Sentences: <strong id="stat-sentences"></strong></li>
+                    <li>📈 Sentiment Score: <strong id="stat-sentiment" class=""></strong></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-1 gap-6 mt-4" data-aos="fade-up">
+            <div>
+                <canvas id="chart-bar" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        AOS.init({ duration: 1000, once: true });
+    </script>
+
+    <script>
+        const sentiment = {{ sentiment }};
+        const organization = "{{ organization | e }}";
+        const summary = `{{ summary | e }}`;
+        const length = {{ length }};
+
+        const sentimentText = sentiment === 0 ? "Positive" : "Negative";
+        const sentimentPercent = sentiment === 0 ? "100%" : "0%";
+        const sentimentClass = sentiment === 0 ? 'text-green-600' : 'text-red-600';
+
+        const wordCount = summary.trim().split(/\s+/).length;
+        const sentenceCount = summary.trim().split(/[.!?]+/).filter(Boolean).length;
+
+        document.getElementById('sentiment').textContent = sentimentText;
+        document.getElementById('organization').textContent = organization;
+        document.getElementById('summary').textContent = summary;
+        document.getElementById('length').textContent = length;
+        document.getElementById('word-count').textContent = wordCount;
+        document.getElementById('sentence-count').textContent = sentenceCount;
+
+        document.getElementById('stat-length').textContent = length;
+        document.getElementById('stat-words').textContent = wordCount;
+        document.getElementById('stat-sentences').textContent = sentenceCount;
+
+        const sentimentEl = document.getElementById('stat-sentiment');
+        sentimentEl.textContent = sentimentPercent;
+        sentimentEl.classList.add(sentimentClass);
+
+        const ctxBar = document.getElementById('chart-bar').getContext('2d');
+        new Chart(ctxBar, {
+            type: 'bar',
+            data: {
+                labels: ['Length', 'Words', 'Sentences'],
+                datasets: [{
+                    label: 'Text Statistics',
+                    data: [length, wordCount, sentenceCount],
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.6)',
+                        'rgba(255, 206, 86, 0.6)',
+                        'rgba(153, 102, 255, 0.6)'
+                    ],
+                    borderColor: [
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(153, 102, 255, 1)'
+                    ],
+                    borderWidth: 1,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                animation: { duration: 1000 },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return `${context.dataset.label}: ${context.parsed.y}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
+                }
+            }
+        });
+    </script>
+
+</body>
+
+</html>

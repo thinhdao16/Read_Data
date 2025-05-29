@@ -1,0 +1,8 @@
+/.venv
+/mlruns
+.env
+/__pycache__/
+__pycache__/
+**/__pycache__/
+*.pyc
+/data/Reviews.csv
